@@ -43,17 +43,7 @@ module.exports = {
       server.close();
     }
   },
-  addHandler(handlerName, handler) {
-    handlers[handlerName] = handler;
+  takeRequest(requestId) {
+    return requests[requestId];
   },
-  removeHandler(handlerName) {
-    return delete handlers[name];
-  },
-  handleRequest(requestId, handlerName) {
-    const { req, res } = requests[requestId];
-    const handler = handlers[handlerName];
-    if (req) {
-      handler(req, res);
-    }
-  }
 };

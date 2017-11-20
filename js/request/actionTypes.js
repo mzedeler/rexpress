@@ -1,4 +1,3 @@
 module.exports = {
   REQUEST: 'REXPRESS_REQUEST',
-  HANDLE: 'REXPRESS_HANDLE',
 };

@@ -3,8 +3,9 @@ const effects = require('redux-saga/effects');
 const driver = require('../driver');
 
 function* request(action) {
-  console.log('request action');
-  console.log(action);
+  const { req, res } = driver.takeRequest(action.requestId);
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('ok');
 }
 
 module.exports = function*() {
