@@ -4,6 +4,7 @@ const createSagaMiddleware = require('redux-saga').default;
 const effects = require('redux-saga/effects');
 const sagaMiddleware = createSagaMiddleware();
 
+const driver = require('./driver');
 const server = require('./server');
 const request = require('./request');
 
@@ -16,12 +17,7 @@ const reducer = redux.combineReducers({
 //   reducer,
 //   redux.applyMiddleware(sagaMiddleware)
 // );
-const sagas = function*() {
-  yield effects.all([
-    server.sagas(),
-    request.sagas(),
-  ])
-};
+const sagas = server.sagas;
 
 // sagaMiddleware.run(sagas);
 
@@ -38,4 +34,5 @@ module.exports = {
   sagas,
   server,
   request,
+  driver,
 };
