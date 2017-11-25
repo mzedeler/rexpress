@@ -12,11 +12,15 @@ module.exports = (store) => ({
       currentRequest++;
       requests[currentRequest] = { req, res };
       const doneHandler = (actionType) => () => {
+        console.log('donehandler');
         delete requests[currentRequest];
         store.dispatch({ type: actionType, id: currentRequest });
       };
-      res.on('closed', doneHandler(actionTypes.REQUEST_CLOSED));
-      res.on('finish', doneHandler(actionTypes.REQUEST_FINISH));
+      res.on('closed', doneHandler(actionTypes.RESPONSE_CLOSED));
+      res.on('finish', doneHandler(actionTypes.RESPONSE_FINISH));
+      res.on('end', doneHandler(actionTypes.RESPONSE_END));
+      req.on('abort', doneHandler(actionTypes.REQUEST_ABORT));
+      req.on('close', doneHandler(actionTypes.REQUEST_CLOSED));
       const { method, url, headers, rawHeaders, httpVersion } = req;
       store.dispatch({
         type: actionTypes.REQUEST_START,
@@ -34,7 +38,7 @@ module.exports = (store) => ({
     server.on('close', closed);
     server.listen(port, () => {
       servers[port] = server;
-      store.dispatch({ type: actionTypes.LISTEN, port });
+      store.dispatch({ type: actionTypes.SERVER_LISTEN, port });
     });
   },
   close: (port) => {
@@ -43,12 +47,13 @@ module.exports = (store) => ({
       delete servers[port];
       server.close();
     }
-    store.dispatch({ type: actionTypes.CLOSE, port })
+    store.dispatch({ type: actionTypes.SERVER_CLOSE, port })
   },
   end(id, data, encoding) {
     const { res } = requests[id];
     if (res) {
       res.end(data, encoding);
+      store.dispatch({ type: actionTypes.RESPONSE_END })
     } // else error handling
   },
   writeHead(id, statusCode, ...rest) {
