@@ -5,26 +5,21 @@ const sagaMiddleware = createSagaMiddleware();
 const effects = require('redux-saga/effects');
 
 const store = redux.createStore(
-  rexpress.reducer,
+  require('./request/reducer'),
   redux.applyMiddleware(sagaMiddleware)
 );
 
 function* mySagas() {
   yield effects.takeEvery(
-    rexpress.request.actionTypes.REQUEST,
-    function*(action) {
-      const { req, res } = rexpress.driver.takeRequest(action.requestId);
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.end('ok!');
+    rexpress.actionTypes.REQUEST_START,
+    function*({ id }) {
+      console.log(id);
+      yield rexpress.actions(store).writeHead(id, 400);
+      yield rexpress.actions(store).end(id, 'pong');
+      console.log('pong');
     }
   );
 }
-const sagas = function*() {
-  yield effects.all([
-    rexpress.sagas(),
-    mySagas(),
-  ]);
-};
 
-sagaMiddleware.run(sagas);
-store.dispatch(rexpress.server.actions.listen(3001));
+sagaMiddleware.run(mySagas);
+rexpress.actions(store).listen(3000);

@@ -1,6 +1,4 @@
-module.exports = {
+module.exports = (store) => ({
   actionTypes: require('./actionTypes'),
-  actions: require('./actions'),
-  reducer: require('./reducer'),
-  sagas: require('./sagas'),
-};
+  actions: require('./actions')(store),
+});

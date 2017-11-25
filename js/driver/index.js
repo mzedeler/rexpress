@@ -28,11 +28,11 @@ module.exports = {
           }
         );
       });
-      server.on('error', reject);
-      server.on('close', () => emitter.emit('close'));
+      // server.on('error', reject);
+      // server.on('close', () => emitter.emit('close'));
       server.listen(port, () => {
         servers[port] = server;
-        resolve(emitter);
+        resolve(server);
       });
     });
   },
