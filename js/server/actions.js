@@ -6,15 +6,14 @@ const servers = {};
 const requests = {};
 let currentRequest = 0;
 
-module.exports = (store) => ({
+module.exports = (dispatch) => ({
   listen: (port) => {
     const server = http.createServer((req, res) => {
       currentRequest++;
       requests[currentRequest] = { req, res };
       const doneHandler = (actionType) => () => {
-        console.log('donehandler');
         delete requests[currentRequest];
-        store.dispatch({ type: actionType, id: currentRequest });
+        dispatch({ type: actionType, id: currentRequest });
       };
       res.on('closed', doneHandler(actionTypes.RESPONSE_CLOSED));
       res.on('finish', doneHandler(actionTypes.RESPONSE_FINISH));
@@ -22,7 +21,7 @@ module.exports = (store) => ({
       req.on('abort', doneHandler(actionTypes.REQUEST_ABORT));
       req.on('close', doneHandler(actionTypes.REQUEST_CLOSED));
       const { method, url, headers, rawHeaders, httpVersion } = req;
-      store.dispatch({
+      dispatch({
         type: actionTypes.REQUEST_START,
         id: currentRequest,
         httpVersion,
@@ -38,7 +37,7 @@ module.exports = (store) => ({
     server.on('close', closed);
     server.listen(port, () => {
       servers[port] = server;
-      store.dispatch({ type: actionTypes.SERVER_LISTEN, port });
+      dispatch({ type: actionTypes.SERVER_LISTEN, port });
     });
   },
   close: (port) => {
@@ -47,13 +46,13 @@ module.exports = (store) => ({
       delete servers[port];
       server.close();
     }
-    store.dispatch({ type: actionTypes.SERVER_CLOSE, port })
+    dispatch({ type: actionTypes.SERVER_CLOSE, port })
   },
   end(id, data, encoding) {
     const { res } = requests[id];
     if (res) {
       res.end(data, encoding);
-      store.dispatch({ type: actionTypes.RESPONSE_END })
+      dispatch({ type: actionTypes.RESPONSE_END })
     } // else error handling
   },
   writeHead(id, statusCode, ...rest) {
@@ -67,7 +66,7 @@ module.exports = (store) => ({
       }
 
       res.writeHead(statusCode, statusMessage, headers);
-      store.dispatch({
+      dispatch({
         type: actionTypes.RESPONSE_WRITE_HEAD,
         statusCode,
         statusMessage,

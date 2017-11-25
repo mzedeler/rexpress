@@ -22,15 +22,17 @@ const store = redux.createStore(
   redux.applyMiddleware(sagaMiddleware)
 );
 
+const actions = rexpress.actions(store.dispatch);
+
 function* mySagas() {
   yield effects.takeEvery(
     rexpress.actionTypes.REQUEST_START,
     function*({ id }) {
-      yield rexpress.actions(store).writeHead(id, 400);
-      yield rexpress.actions(store).end(id, 'pong');
+      yield actions.writeHead(id, 400);
+      yield actions.end(id, 'pong');
     }
   );
 }
 
 sagaMiddleware.run(mySagas);
-rexpress.actions(store).listen(3000);
+actions.listen(3000);
