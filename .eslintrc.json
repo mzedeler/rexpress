@@ -1,3 +1,27 @@
 {
-    "extends": "standard"
+  "extends": "airbnb-base",
+  "rules": {
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "always-multiline",
+        "objects": "always-multiline",
+        "functions": "never"
+      }
+    ],
+    "function-paren-newline": ["error", "consistent"],
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.test.js", "**/*.spec.js"] }]
+  },
+  "plugins": ["jest"],
+  "env": {
+    "jest/globals": true
+  },
+  "overrides": [
+    {
+      "files": [ "**/*.test.js" ],
+      "rules": {
+          "global-require": ["off"]
+      }
+    }
+  ]
 }
