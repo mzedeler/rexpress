@@ -65,6 +65,13 @@ module.exports = (dispatch) => {
         dispatch({ type: actionTypes.RESPONSE_END });
       } // else error handling
     },
+    write(id, chunk, encoding) {
+      const { res } = requests[id];
+      if (res) {
+        res.write(chunk, encoding);
+        dispatch({ type: actionTypes.RESPONSE_WRITE, chunk, encoding });
+      }
+    },
     writeHead(id, statusCode, ...rest) {
       const { res } = requests[id];
       if (res) {

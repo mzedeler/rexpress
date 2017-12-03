@@ -36,6 +36,7 @@ function* mySagas() {
       const inputId = `file.${id}`;
       yield replugActions.restream.readable(inputId, fs.createReadStream(__filename));
       yield actions.writeHead(id, 200);
+      yield actions.write(id, 'Hi.\r\n\r\nThis is the demo script. My content is:\r\n\r\n---\r\n\r\n');
       yield replugActions.restream.pipe(inputId, resId);
     }
   );
