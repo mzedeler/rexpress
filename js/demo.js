@@ -2,6 +2,8 @@ const _ = require('lodash');
 const redux = require('redux');
 const rexpress = require('.');
 const createSagaMiddleware = require('redux-saga').default;
+const replug = require('replug');
+const fs = require('fs');
 
 const sagaMiddleware = createSagaMiddleware();
 const effects = require('redux-saga/effects');
@@ -25,12 +27,16 @@ const store = redux.createStore(
 
 const actions = rexpress.actions(store.dispatch);
 
+const replugActions = replug.actions(store.dispatch);
+
 function* mySagas() {
   yield effects.takeEvery(
     rexpress.actionTypes.REQUEST_START,
-    function* handler({ id }) {
+    function* handler({ id, resId }) {
+      const inputId = `file.${id}`;
+      yield replugActions.restream.readable(inputId, fs.createReadStream(__filename));
       yield actions.writeHead(id, 200);
-      yield actions.end(id, 'pong');
+      yield replugActions.restream.pipe(inputId, resId);
     }
   );
 }
