@@ -6,12 +6,12 @@ const servers = {};
 const requests = {};
 let currentRequest = 0;
 
-module.exports = (dispatch) => ({
+module.exports = dispatch => ({
   listen: (port) => {
     const server = http.createServer((req, res) => {
-      currentRequest++;
+      currentRequest += 1;
       requests[currentRequest] = { req, res };
-      const doneHandler = (actionType) => () => {
+      const doneHandler = actionType => () => {
         delete requests[currentRequest];
         dispatch({ type: actionType, id: currentRequest });
       };
@@ -31,8 +31,8 @@ module.exports = (dispatch) => ({
         rawHeaders,
       });
     });
-    const failed = () => console.log('not implemented: failed');
-    const closed = () => console.log('not implemented: closed');
+    const failed = () => console.log('not implemented: failed'); // eslint-disable-line no-console
+    const closed = () => console.log('not implemented: closed'); // eslint-disable-line no-console
     server.on('error', failed);
     server.on('close', closed);
     server.listen(port, () => {
@@ -46,13 +46,13 @@ module.exports = (dispatch) => ({
       delete servers[port];
       server.close();
     }
-    dispatch({ type: actionTypes.SERVER_CLOSE, port })
+    dispatch({ type: actionTypes.SERVER_CLOSE, port });
   },
   end(id, data, encoding) {
     const { res } = requests[id];
     if (res) {
       res.end(data, encoding);
-      dispatch({ type: actionTypes.RESPONSE_END })
+      dispatch({ type: actionTypes.RESPONSE_END });
     } // else error handling
   },
   writeHead(id, statusCode, ...rest) {
@@ -61,9 +61,9 @@ module.exports = (dispatch) => ({
       const statusMessage = typeof rest[0] === 'string' ? rest[0] : null;
       const headers = typeof rest === 'object' ? rest[0] : rest[1];
 
-      for(const name in headers) {
+      Object.keys(headers).forEach((name) => {
         res.setHeader(name, headers[name]);
-      }
+      });
 
       res.writeHead(statusCode, statusMessage, headers);
       dispatch({
@@ -73,5 +73,5 @@ module.exports = (dispatch) => ({
         headers: _.cloneDeep(res.getHeaders()),
       });
     } // else error handling
-  }
+  },
 });

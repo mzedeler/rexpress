@@ -1,6 +1,7 @@
 {
   "extends": "airbnb-base",
   "rules": {
+    "object-curly-newline": ["error", { "consistent": true }],
     "comma-dangle": [
       "error",
       {
