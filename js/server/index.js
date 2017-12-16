@@ -1,4 +1,4 @@
-module.exports = (store) => ({
+module.exports = {
   actionTypes: require('./actionTypes'),
-  actions: require('./actions')(store),
-});
+  actions: require('./actions'),
+};

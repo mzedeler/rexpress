@@ -25,9 +25,16 @@ const store = redux.createStore(
   redux.applyMiddleware(sagaMiddleware)
 );
 
-const actions = rexpress.actions(store.dispatch);
+const bindActions = (dispatch, getState, actions) => _
+  .cloneDeepWith(actions, (value) => { // eslint-disable-line consistent-return
+    if (typeof value === 'function') {
+      return (...args) => _.spread(value)(args)(dispatch, getState);
+    }
+  });
 
-const replugActions = replug.actions(store.dispatch);
+const actions = bindActions(store.dispatch, store.getState, rexpress.actions);
+
+const replugActions = bindActions(store.dispatch, store.getState, replug.actions);
 
 function* mySagas() {
   yield effects.takeEvery(
