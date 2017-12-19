@@ -18,7 +18,7 @@ module.exports = {
       method,
       url,
       headers,
-      rawHeaders
+      rawHeaders,
     };
   },
   requestClose(id) { return { type: actionTypes.REQUEST_CLOSE, id }; },

@@ -1,10 +1,11 @@
 const _ = require('lodash');
 const { buffers, eventChannel, END } = require('redux-saga');
-const { cps, put, take, takeEvery } = require('redux-saga/effects');
+const { cps, fork, put, take, takeEvery } = require('redux-saga/effects');
 const http = require('http');
 const actions = require('./actions');
 const actionTypes = require('./actionTypes');
 const { readableRegister, writableRegister } = require('restream').actions;
+const restream = require('restream');
 
 const servers = {};
 const requests = {};
@@ -99,6 +100,7 @@ function* responseEndSaga({ id, data, encoding }) {
 }
 
 function* rootSaga() {
+  yield fork(restream.sagas);
   yield takeEvery(actionTypes.SERVER_LISTEN, serverListenSaga);
   yield takeEvery(actionTypes.SERVER_CLOSE, serverCloseSaga);
   yield takeEvery(actionTypes.RESPONSE_WRITE, responseWriteSaga);
