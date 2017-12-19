@@ -4,7 +4,9 @@
   "description": "Redux based http server",
   "main": "js/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint .",
+    "demo": "node ./js/demo.js"
   },
   "keywords": [
     "http",
@@ -13,7 +15,7 @@
   "author": "Michael Zedeler <michael@zedeler.dk>",
   "license": "MIT",
   "dependencies": {
-    "replug": "^1.0.0",
+    "restream": "^1.0.0",
     "lodash": "^4.17.4",
     "redux": "^3.7.2",
     "redux-saga": "^0.16.0"

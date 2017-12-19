@@ -1,4 +1,6 @@
+/* eslint-disable global-require */
 module.exports = {
-  actions: require('./server/actions'),
-  actionTypes: require('./server/actionTypes'),
+  actionTypes: require('./actionTypes'),
+  actions: require('./actions'),
+  sagas: require('./sagas'),
 };
