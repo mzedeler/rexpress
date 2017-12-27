@@ -20,24 +20,27 @@ function* serveRequestSaga([req, res]) {
   yield put(readableRegister(reqId, req));
   yield put(writableRegister(resId, res));
 
-  const channel = eventChannel((emitter) => {
-    const done = action => () => {
-      emitter(action);
-      // TODO: test which actions pass through if leaving this out:
-      delete requests[id];
-      emitter(END);
-    };
-    res.on('close', done(actions.responseClose(id)));
-    res.on('finish', done(actions.responseFinish(id)));
-    res.on('end', done(actions.responseEventEnd(id)));
+  const channel = eventChannel(
+    (emitter) => {
+      const done = action => () => {
+        emitter(action);
+        // TODO: test which actions pass through if leaving this out:
+        delete requests[id];
+        emitter(END);
+      };
+      res.on('close', done(actions.responseClose(id)));
+      res.on('finish', done(actions.responseFinish(id)));
+      res.on('end', done(actions.responseEventEnd(id)));
 
-    req.on('abort', done(actions.requestAbort(id)));
-    req.on('close', done(actions.requestClose(id)));
+      req.on('abort', done(actions.requestAbort(id)));
+      req.on('close', done(actions.requestClose(id)));
 
-    return _.noop; // TODO: cleanup: abort response
-  });
+      return _.noop; // TODO: cleanup: abort response
+    },
+    buffers.expanding(1)
+  );
 
-  takeEvery(channel, function* emit(action) { yield put(action); });
+  yield takeEvery(channel, put);
 
   const { method, url, headers, rawHeaders, httpVersion } = req;
   yield put(actions.requestStart(id, reqId, resId, httpVersion, method, url, headers, rawHeaders));
