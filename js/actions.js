@@ -53,4 +53,5 @@ module.exports = {
   responseEndDone(id, chunk, encoding) { return { type: actionTypes.RESPONSE_END_DONE, id, chunk, encoding }; },
   responseClose(id) { return { type: actionTypes.RESPONSE_CLOSE, id }; },
   responseFinish(id) { return { type: actionTypes.RESPONSE_FINISH, id }; },
+  responseEventEnd(id) { return { type: actionTypes.RESPONSE_EVENT_END, id }; },
 };

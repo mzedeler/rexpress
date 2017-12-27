@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const { buffers, eventChannel, END } = require('redux-saga');
-const { cps, fork, put, take, takeEvery } = require('redux-saga/effects');
+const { cps, fork, spawn, put, take, takeEvery } = require('redux-saga/effects');
 const http = require('http');
 const actions = require('./actions');
 const actionTypes = require('./actionTypes');
@@ -29,7 +29,7 @@ function* serveRequestSaga([req, res]) {
     };
     res.on('close', done(actions.responseClose(id)));
     res.on('finish', done(actions.responseFinish(id)));
-    res.on('end', done(actions.responseEnd(id)));
+    res.on('end', done(actions.responseEventEnd(id)));
 
     req.on('abort', done(actions.requestAbort(id)));
     req.on('close', done(actions.requestClose(id)));
@@ -53,11 +53,10 @@ function* serverListenSaga(port) {
     },
     buffers.expanding(1)
   );
-  console.log(1);
+
   const server = yield take(channel);
-  console.log(2);
+
   try {
-    console.log(3);
     yield cps([server, server.listen], port);
     servers[port] = { server, channel };
     yield takeEvery(channel, serveRequestSaga);
@@ -91,21 +90,29 @@ function* responseWriteHeadSaga({ id, statusCode, statusMessage, headers }) {
   } // else error handling
 }
 
-function* responseEndSaga({ id, data, encoding }) {
+function* responseEndSaga({ id, chunk, encoding }) {
   const { res } = requests[id];
   if (res) {
-    res.end(data, encoding);
-    yield put(actions.responseEndDone(id, data, encoding));
+    res.end(chunk, encoding);
+    yield put(actions.responseEndDone(id, chunk, encoding));
   } // else error handling
 }
 
+let running = false;
 function* rootSaga() {
-  yield fork(restream.sagas);
-  yield takeEvery(actionTypes.SERVER_LISTEN, serverListenSaga);
-  yield takeEvery(actionTypes.SERVER_CLOSE, serverCloseSaga);
-  yield takeEvery(actionTypes.RESPONSE_WRITE, responseWriteSaga);
-  yield takeEvery(actionTypes.RESPONSE_WRITE_HEAD, responseWriteHeadSaga);
-  yield takeEvery(actionTypes.RESPONSE_END, responseEndSaga);
+  if (running) {
+    // eslint-disable-next-line no-console
+    console.error('rexpress already running. This will lead to unpredictable results.');
+  }
+  running = true;
+  yield spawn(function* listeners() {
+    yield fork(restream.sagas);
+    yield takeEvery(actionTypes.SERVER_LISTEN, serverListenSaga);
+    yield takeEvery(actionTypes.SERVER_CLOSE, serverCloseSaga);
+    yield takeEvery(actionTypes.RESPONSE_WRITE, responseWriteSaga);
+    yield takeEvery(actionTypes.RESPONSE_WRITE_HEAD, responseWriteHeadSaga);
+    yield takeEvery(actionTypes.RESPONSE_END, responseEndSaga);
+  });
 }
 
 module.exports = rootSaga;
